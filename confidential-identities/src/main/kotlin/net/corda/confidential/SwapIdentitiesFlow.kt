@@ -38,7 +38,7 @@ class SwapIdentitiesFlow(private val otherParty: Party,
 
         fun tracker() = ProgressTracker(AWAITING_KEY)
         /**
-         * Generate the determinstic data blob the confidential identity's key holder signs to indicate they want to
+         * Generate the deterministic data blob the confidential identity's key holder signs to indicate they want to
          * represent the subject named in the X.509 certificate. Note that this is never actually sent between nodes,
          * but only the signature is sent. The blob is built independently on each node and the received signature
          * verified against the expected blob, rather than exchanging the blob.
@@ -76,7 +76,8 @@ class SwapIdentitiesFlow(private val otherParty: Party,
         val legalIdentityAnonymous = serviceHub.keyManagementService.freshKeyAndCert(ourIdentityAndCert, revocationEnabled)
         val serializedIdentity = SerializedBytes<PartyAndCertificate>(legalIdentityAnonymous.serialize().bytes)
 
-        // Special case that if we're both parties, a single identity is generated
+        // Special case that if we're both parties, a single identity is generated.
+        // TODO: for increased privacy, we should create one anonymous key per output state.
         val identities = LinkedHashMap<Party, AnonymousParty>()
         if (serviceHub.myInfo.isLegalIdentity(otherParty)) {
             identities.put(otherParty, legalIdentityAnonymous.party.anonymise())
