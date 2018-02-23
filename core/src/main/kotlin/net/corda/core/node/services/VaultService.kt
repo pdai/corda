@@ -157,17 +157,18 @@ interface VaultService {
     /**
      * Prefer the use of [updates] unless you know why you want to use this instead.
      *
-     * Get a synchronous Observable of updates.  When observations are pushed to the Observer, the Vault will already incorporate
-     * the update, and the database transaction associated with the update will still be open and current.  If for some
-     * reason the processing crosses outside of the database transaction (for example, the update is pushed outside the current
-     * JVM or across to another [Thread] which is executing in a different database transaction) then the Vault may
-     * not incorporate the update due to racing with committing the current database transaction.
+     * Get a synchronous [Observable] of updates.  When observations are pushed to the Observer, the [Vault] will already
+     * incorporate the update, and the database transaction associated with the update will still be open and current.
+     * If for some reason the processing crosses outside of the database transaction (for example, the update is pushed
+     * outside the current JVM or across to another [Thread], which is executing in a different database transaction),
+     * then the [Vault] may not incorporate the update due to racing with committing the current database transaction.
      */
     val rawUpdates: Observable<Vault.Update<ContractState>>
 
     /**
-     * Get a synchronous Observable of updates.  When observations are pushed to the Observer, the Vault will already incorporate
-     * the update, and the database transaction associated with the update will have been committed and closed.
+     * Get a synchronous [Observable] of updates.  When observations are pushed to the Observer, the [Vault] will
+     * already incorporate the update and the database transaction associated with the update will have been committed
+     * and closed.
      */
     val updates: Observable<Vault.Update<ContractState>>
 
@@ -179,10 +180,10 @@ interface VaultService {
     }
 
     /**
-     *  Add a note to an existing [LedgerTransaction] given by its unique [SecureHash] id
+     *  Add a note to an existing [LedgerTransaction] given by its unique [SecureHash] id.
      *  Multiple notes may be attached to the same [LedgerTransaction].
-     *  These are additively and immutably persisted within the node local vault database in a single textual field
-     *  using a semi-colon separator
+     *  These are additively and immutably persisted within the node local vault database in a single textual field.
+     *  using a semi-colon separator.
      */
     fun addNoteToTransaction(txnId: SecureHash, noteText: String)
 
@@ -191,7 +192,7 @@ interface VaultService {
     // DOCEND VaultStatesQuery
 
     /**
-     * Soft locking is used to prevent multiple transactions trying to use the same output simultaneously.
+     * Soft locking is used to prevent multiple transactions trying to use the same states simultaneously.
      * Violation of a soft lock would result in a double spend being created and rejected by the notary.
      */
 
@@ -201,33 +202,33 @@ interface VaultService {
      * Reserve a set of [StateRef] for a given [UUID] unique identifier.
      * Typically, the unique identifier will refer to a [FlowLogic.runId]'s [UUID] associated with an in-flight flow.
      * In this case if the flow terminates the locks will automatically be freed, even if there is an error.
-     * However, the user can specify their own [UUID] and manage this manually, possibly across the lifetime of multiple flows,
-     * or from other thread contexts e.g. [CordaService] instances.
+     * However, the user can specify their own [UUID] and manage this manually, possibly across the lifetime of multiple
+     * flows, or from other thread contexts e.g. [CordaService] instances.
      * In the case of coin selection, soft locks are automatically taken upon gathering relevant unconsumed input refs.
      *
-     * @throws [StatesNotAvailableException] when not possible to softLock all of requested [StateRef]
+     * @throws [StatesNotAvailableException] when not possible to softLock all of requested [StateRef].
      */
     @Throws(StatesNotAvailableException::class)
     fun softLockReserve(lockId: UUID, stateRefs: NonEmptySet<StateRef>)
 
     /**
      * Release all or an explicitly specified set of [StateRef] for a given [UUID] unique identifier.
-     * A vault soft lock manager is automatically notified of a Flows that are terminated, such that any soft locked states
-     * may be released.
-     * In the case of coin selection, softLock are automatically released once previously gathered unconsumed input refs
-     * are consumed as part of cash spending.
+     * A [Vault] softLock manager is automatically notified from flows that are terminated, such that any soft locked
+     * states may be released.
+     * In the case of coin selection, softLocks are automatically released once previously gathered unconsumed
+     * input refs are consumed as part of cash spending.
      */
     fun softLockRelease(lockId: UUID, stateRefs: NonEmptySet<StateRef>? = null)
     // DOCEND SoftLockAPI
 
     /**
      * Helper function to determine spendable states and soft locking them.
-     * Currently performance will be worse than for the hand optimised version in `Cash.unconsumedCashStatesForSpending`
+     * Currently performance will be worse than for the hand optimised version in `Cash.unconsumedCashStatesForSpending`.
      * However, this is fully generic and can operate with custom [FungibleAsset] states.
      * @param lockId The [FlowLogic.runId]'s [UUID] of the current flow used to soft lock the states.
      * @param eligibleStatesQuery A custom query object that selects down to the appropriate subset of all states of the
-     * [contractStateType]. e.g. by selecting on account, issuer, etc. The query is internally augmented with the UNCONSUMED,
-     * soft lock and contract type requirements.
+     * [contractStateType]. e.g. by selecting on account, issuer, etc. The query is internally augmented with the
+     * [StateStatus.UNCONSUMED], soft lock and contract type requirements.
      * @param amount The required amount of the asset, but with the issuer stripped off.
      * It is assumed that compatible issuer states will be filtered out by the [eligibleStatesQuery].
      * @param contractStateType class type of the result set.
@@ -270,7 +271,7 @@ interface VaultService {
     /**
      * Generic vault query function which takes a [QueryCriteria] object to define filters,
      * optional [PageSpecification] and optional [Sort] modification criteria (default unsorted),
-     * and returns a [DataFeed] object containing
+     * and returns a [DataFeed] object containing:
      * 1) a snapshot as a [Vault.Page] (described previously in [queryBy]).
      * 2) an [Observable] of [Vault.Update].
      *
@@ -286,8 +287,8 @@ interface VaultService {
                                      contractStateType: Class<out T>): DataFeed<Vault.Page<T>, Vault.Update<T>>
     // DOCEND VaultQueryAPI
 
-    // Note: cannot apply @JvmOverloads to interfaces nor interface implementations
-    // Java Helpers
+    // Note: cannot apply @JvmOverloads to interfaces nor interface implementations.
+    // Java Helpers.
     fun <T : ContractState> queryBy(contractStateType: Class<out T>): Vault.Page<T> {
         return _queryBy(QueryCriteria.VaultQueryCriteria(), PageSpecification(), Sort(emptySet()), contractStateType)
     }
