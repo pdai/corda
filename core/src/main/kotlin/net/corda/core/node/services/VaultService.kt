@@ -213,7 +213,7 @@ interface VaultService {
 
     /**
      * Release all or an explicitly specified set of [StateRef] for a given [UUID] unique identifier.
-     * A [Vault] softLock manager is automatically notified from flows that are terminated, such that any soft locked
+     * A [Vault] soft-lock manager is automatically notified from flows that are terminated, such that any soft locked
      * states may be released.
      * In the case of coin selection, softLocks are automatically released once previously gathered unconsumed
      * input refs are consumed as part of cash spending.
