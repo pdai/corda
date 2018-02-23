@@ -206,7 +206,7 @@ interface VaultService {
      * flows, or from other thread contexts e.g. [CordaService] instances.
      * In the case of coin selection, soft locks are automatically taken upon gathering relevant unconsumed input refs.
      *
-     * @throws [StatesNotAvailableException] when not possible to softLock all of requested [StateRef].
+     * @throws [StatesNotAvailableException] when not possible to soft-lock all of requested [StateRef].
      */
     @Throws(StatesNotAvailableException::class)
     fun softLockReserve(lockId: UUID, stateRefs: NonEmptySet<StateRef>)
@@ -215,7 +215,7 @@ interface VaultService {
      * Release all or an explicitly specified set of [StateRef] for a given [UUID] unique identifier.
      * A [Vault] soft-lock manager is automatically notified from flows that are terminated, such that any soft locked
      * states may be released.
-     * In the case of coin selection, softLocks are automatically released once previously gathered unconsumed
+     * In the case of coin selection, soft-locks are automatically released once previously gathered unconsumed
      * input refs are consumed as part of cash spending.
      */
     fun softLockRelease(lockId: UUID, stateRefs: NonEmptySet<StateRef>? = null)
