@@ -223,6 +223,7 @@ fun componentHash(opaqueBytes: OpaqueBytes, privacySalt: PrivacySalt, componentG
 fun componentHash(nonce: SecureHash, opaqueBytes: OpaqueBytes): SecureHash = SecureHash.sha256Twice(nonce.bytes + opaqueBytes.bytes)
 
 /** Serialise the object and return the hash of the serialized bytes. */
+@Deprecated("Do not use, the resulting hash won't be deterministic since it's affected by the serialization context")
 fun <T : Any> serializedHash(x: T): SecureHash = x.serialize(context = SerializationDefaults.P2P_CONTEXT.withoutReferences()).bytes.sha256()
 
 /**
