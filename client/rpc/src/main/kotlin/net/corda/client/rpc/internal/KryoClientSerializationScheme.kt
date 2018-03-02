@@ -2,13 +2,10 @@ package net.corda.client.rpc.internal
 
 import com.esotericsoftware.kryo.pool.KryoPool
 import net.corda.core.serialization.SerializationContext
-import net.corda.nodeapi.internal.serialization.CordaSerializationMagic
 import net.corda.core.serialization.internal.SerializationEnvironment
 import net.corda.core.serialization.internal.SerializationEnvironmentImpl
 import net.corda.core.serialization.internal.nodeSerializationEnv
-import net.corda.nodeapi.internal.serialization.KRYO_P2P_CONTEXT
-import net.corda.nodeapi.internal.serialization.KRYO_RPC_CLIENT_CONTEXT
-import net.corda.nodeapi.internal.serialization.SerializationFactoryImpl
+import net.corda.nodeapi.internal.serialization.*
 import net.corda.nodeapi.internal.serialization.amqp.AMQPClientSerializationScheme
 import net.corda.nodeapi.internal.serialization.kryo.AbstractKryoSerializationScheme
 import net.corda.nodeapi.internal.serialization.kryo.DefaultKryoCustomizer
@@ -43,7 +40,7 @@ class KryoClientSerializationScheme : AbstractKryoSerializationScheme() {
                         registerScheme(KryoClientSerializationScheme())
                         registerScheme(AMQPClientSerializationScheme(emptyList()))
                     },
-                    KRYO_P2P_CONTEXT,
+                    AMQP_P2P_CONTEXT,
                     rpcClientContext = KRYO_RPC_CLIENT_CONTEXT)
         }
     }
