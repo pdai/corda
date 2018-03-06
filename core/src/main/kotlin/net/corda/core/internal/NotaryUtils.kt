@@ -13,7 +13,7 @@ import net.corda.core.serialization.serialize
 internal val signedEmptyUniquenessConflict: SignedData<UniquenessProvider.Conflict> by lazy {
     val key = Crypto.generateKeyPair()
     val emptyConflict = UniquenessProvider.Conflict(emptyMap()).serialize()
-    val signature = key.sign(emptyConflict.serialize())
+    val signature = key.sign(emptyConflict)
     SignedData(emptyConflict, signature)
 }
 
