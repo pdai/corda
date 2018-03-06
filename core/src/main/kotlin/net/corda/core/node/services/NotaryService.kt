@@ -6,6 +6,7 @@ import net.corda.core.contracts.TimeWindow
 import net.corda.core.crypto.*
 import net.corda.core.flows.*
 import net.corda.core.identity.Party
+import net.corda.core.internal.DoubleSpendException
 import net.corda.core.node.ServiceHub
 import net.corda.core.serialization.SingletonSerializeAsToken
 import net.corda.core.serialization.serialize
@@ -82,10 +83,10 @@ abstract class TrustedAuthorityNotaryService : NotaryService() {
     fun commitInputStates(inputs: List<StateRef>, txId: SecureHash, caller: Party) {
         try {
             uniquenessProvider.commit(inputs, txId, caller)
-        } catch (e: UniquenessException) {
-            val conflicts = inputs.filterIndexed { i, stateRef ->
-                val consumingTx = e.error.stateHistory[stateRef]
-                consumingTx != null && consumingTx != UniquenessProvider.ConsumingTx(txId, i, caller)
+        } catch (e: DoubleSpendException) {
+            val conflicts = inputs.filterIndexed { _, stateRef ->
+                val cause = e.error.stateConflicts[stateRef]
+                cause != null && cause.transactionIdHash != txId.sha256()
             }
             if (conflicts.isNotEmpty()) {
                 // TODO: Create a new UniquenessException that only contains the conflicts filtered above.
@@ -98,7 +99,7 @@ abstract class TrustedAuthorityNotaryService : NotaryService() {
         }
     }
 
-    private fun notaryException(txId: SecureHash, e: UniquenessException): NotaryException {
+    private fun notaryException(txId: SecureHash, e: DoubleSpendException): NotaryException {
         val conflictData = e.error.serialize()
         val signedConflict = SignedData(conflictData, sign(conflictData.bytes))
         return NotaryException(NotaryError.Conflict(txId, signedConflict))

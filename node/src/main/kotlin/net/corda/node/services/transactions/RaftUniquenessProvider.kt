@@ -19,8 +19,10 @@ import io.atomix.copycat.server.storage.Storage
 import io.atomix.copycat.server.storage.StorageLevel
 import net.corda.core.contracts.StateRef
 import net.corda.core.crypto.SecureHash
+import net.corda.core.crypto.sha256
+import net.corda.core.flows.DoubleSpendConflict
 import net.corda.core.identity.Party
-import net.corda.core.node.services.UniquenessException
+import net.corda.core.internal.DoubleSpendException
 import net.corda.core.node.services.UniquenessProvider
 import net.corda.core.serialization.SerializationDefaults
 import net.corda.core.serialization.SingletonSerializeAsToken
@@ -204,7 +206,10 @@ class RaftUniquenessProvider(private val transportConfiguration: NodeSSLConfigur
         val commitCommand = DistributedImmutableMap.Commands.PutAll(encode(entries))
         val conflicts = client.submit(commitCommand).get()
 
-        if (conflicts.isNotEmpty()) throw UniquenessException(UniquenessProvider.Conflict(decode(conflicts)))
+        if (conflicts.isNotEmpty()) {
+            val conflictingStates = decode(conflicts).mapValues { DoubleSpendConflict.Cause(it.value.id.sha256()) }
+            throw DoubleSpendException(DoubleSpendConflict(conflictingStates))
+        }
         log.debug("All input states of transaction $txId have been committed")
     }
 

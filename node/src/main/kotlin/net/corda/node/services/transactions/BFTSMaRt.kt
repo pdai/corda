@@ -14,10 +14,11 @@ import bftsmart.tom.server.defaultservices.DefaultReplier
 import bftsmart.tom.util.Extractor
 import net.corda.core.contracts.StateRef
 import net.corda.core.crypto.*
+import net.corda.core.flows.DoubleSpendConflict
+import net.corda.core.flows.NotarisationPayload
 import net.corda.core.flows.NotaryError
 import net.corda.core.flows.NotaryException
 import net.corda.core.identity.Party
-import net.corda.core.flows.NotarisationPayload
 import net.corda.core.internal.declaredField
 import net.corda.core.internal.toTypedArray
 import net.corda.core.node.services.UniquenessProvider
@@ -232,7 +233,7 @@ object BFTSMaRt {
                     }
                 } else {
                     log.debug { "Conflict detected – the following inputs have already been committed: ${conflicts.keys.joinToString()}" }
-                    val conflict = UniquenessProvider.Conflict(conflicts)
+                    val conflict = DoubleSpendConflict(conflicts.mapValues { DoubleSpendConflict.Cause(it.value.id.sha256()) })
                     val conflictData = conflict.serialize()
                     val signedConflict = SignedData(conflictData, sign(conflictData.bytes))
                     throw NotaryException(NotaryError.Conflict(txId, signedConflict))

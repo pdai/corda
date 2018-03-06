@@ -3,10 +3,12 @@ package net.corda.node.services.transactions
 import net.corda.core.contracts.StateRef
 import net.corda.core.crypto.Crypto
 import net.corda.core.crypto.SecureHash
+import net.corda.core.crypto.sha256
+import net.corda.core.flows.DoubleSpendConflict
 import net.corda.core.identity.CordaX500Name
 import net.corda.core.identity.Party
+import net.corda.core.internal.DoubleSpendException
 import net.corda.core.internal.ThreadBox
-import net.corda.core.node.services.UniquenessException
 import net.corda.core.node.services.UniquenessProvider
 import net.corda.core.schemas.PersistentStateRef
 import net.corda.core.serialization.SingletonSerializeAsToken
@@ -90,7 +92,6 @@ class PersistentUniquenessProvider : UniquenessProvider, SingletonSerializeAsTok
     }
 
     override fun commit(states: List<StateRef>, txId: SecureHash, callerIdentity: Party) {
-
         val conflict = mutex.locked {
             val conflictingStates = LinkedHashMap<StateRef, UniquenessProvider.ConsumingTx>()
             for (inputState in states) {
@@ -99,7 +100,8 @@ class PersistentUniquenessProvider : UniquenessProvider, SingletonSerializeAsTok
             }
             if (conflictingStates.isNotEmpty()) {
                 log.debug("Failure, input states already committed: ${conflictingStates.keys}")
-                UniquenessProvider.Conflict(conflictingStates)
+                val conflict = conflictingStates.mapValues { DoubleSpendConflict.Cause(it.value.id.sha256()) }
+                DoubleSpendConflict(conflict)
             } else {
                 states.forEachIndexed { i, stateRef ->
                     committedStates[stateRef] = UniquenessProvider.ConsumingTx(txId, i, callerIdentity)
@@ -109,6 +111,6 @@ class PersistentUniquenessProvider : UniquenessProvider, SingletonSerializeAsTok
             }
         }
 
-        if (conflict != null) throw UniquenessException(conflict)
+        if (conflict != null) throw DoubleSpendException(conflict)
     }
 }

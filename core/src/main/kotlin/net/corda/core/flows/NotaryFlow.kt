@@ -10,11 +10,11 @@ import net.corda.core.crypto.keys
 import net.corda.core.identity.Party
 import net.corda.core.internal.FetchDataFlow
 import net.corda.core.internal.generateSignature
+import net.corda.core.internal.signedEmptyUniquenessConflict
 import net.corda.core.node.services.NotaryService
 import net.corda.core.node.services.TrustedAuthorityNotaryService
 import net.corda.core.node.services.UniquenessProvider
 import net.corda.core.serialization.CordaSerializable
-import net.corda.core.transactions.CoreTransaction
 import net.corda.core.transactions.ContractUpgradeWireTransaction
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.WireTransaction
@@ -203,8 +203,15 @@ class NotaryException(val error: NotaryError) : FlowException("Unable to notaris
 @CordaSerializable
 sealed class NotaryError {
     /** Occurs when one or more input states of transaction with [txId] have already been consumed by another transaction. */
-    data class Conflict(val txId: SecureHash, val conflict: SignedData<UniquenessProvider.Conflict>) : NotaryError() {
+    data class Conflict(val txId: SecureHash,
+                        val signedConflict: SignedData<DoubleSpendConflict>
+    ) : NotaryError() {
         override fun toString() = "One or more input states for transaction $txId have been used in another transaction"
+
+        @Deprecated("No longer populated due to potential privacy issues", ReplaceWith("Use signedConflict property instead"))
+        @Suppress("DEPRECATION")
+        val conflict: SignedData<UniquenessProvider.Conflict>
+            get() = signedEmptyUniquenessConflict
     }
 
     /** Occurs when time specified in the [TimeWindow] command is outside the allowed tolerance. */
@@ -235,4 +242,18 @@ sealed class NotaryError {
     data class General(val cause: Throwable) : NotaryError() {
         override fun toString() = cause.toString()
     }
+}
+
+/** Contains information about the cause of the double-spend conflict for each of the conflicting input states. */
+@CordaSerializable
+data class DoubleSpendConflict(val stateConflicts: Map<StateRef, Cause>) {
+    @CordaSerializable
+    data class Cause(
+            /**
+             * Hash of the consuming transaction id.
+             *
+             * Note that this is NOT the transaction id itself – revealing it could lead to privacy leaks.
+             */
+            val transactionIdHash: SecureHash
+    )
 }
