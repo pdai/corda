@@ -1,10 +1,8 @@
 package net.corda.core.internal
 
-import net.corda.core.CordaException
-import net.corda.core.crypto.Crypto
-import net.corda.core.crypto.SignedData
-import net.corda.core.crypto.sign
-import net.corda.core.flows.DoubleSpendConflict
+import net.corda.core.crypto.*
+import net.corda.core.flows.NotarisationResponse
+import net.corda.core.identity.Party
 import net.corda.core.node.services.UniquenessProvider
 import net.corda.core.serialization.serialize
 
@@ -17,5 +15,12 @@ internal val signedEmptyUniquenessConflict: SignedData<UniquenessProvider.Confli
     SignedData(emptyConflict, signature)
 }
 
-/** An internal exception used for propagating the error from the notary service to the notary flow. */
-class DoubleSpendException(val error: DoubleSpendConflict) : CordaException(DoubleSpendException::class.java.name)
+/**
+ * Checks that there are sufficient signatures to satisfy the notary signing requirement and validates the signatures
+ * against the given transaction id.
+ */
+fun NotarisationResponse.validateSignatures(txId: SecureHash, notary: Party) {
+    val signingKeys = signatures.map { it.by }
+    require(notary.owningKey.isFulfilledBy(signingKeys)) { "Insufficient signatures to fulfill the notary signing requirement for $notary" }
+    signatures.forEach { it.verify(txId) }
+}

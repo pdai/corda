@@ -5,9 +5,10 @@ import net.corda.core.crypto.Crypto
 import net.corda.core.crypto.SecureHash
 import net.corda.core.crypto.sha256
 import net.corda.core.flows.DoubleSpendConflict
+import net.corda.core.flows.InternalNotaryException
+import net.corda.core.flows.NotaryError
 import net.corda.core.identity.CordaX500Name
 import net.corda.core.identity.Party
-import net.corda.core.internal.DoubleSpendException
 import net.corda.core.internal.ThreadBox
 import net.corda.core.node.services.UniquenessProvider
 import net.corda.core.schemas.PersistentStateRef
@@ -69,7 +70,8 @@ class PersistentUniquenessProvider : UniquenessProvider, SingletonSerializeAsTok
                         toPersistentEntityKey = { PersistentStateRef(it.txhash.toString(), it.index) },
                         fromPersistentEntity = {
                             //TODO null check will become obsolete after making DB/JPA columns not nullable
-                            var txId = it.id.txId ?: throw IllegalStateException("DB returned null SecureHash transactionId")
+                            var txId = it.id.txId
+                                    ?: throw IllegalStateException("DB returned null SecureHash transactionId")
                             var index = it.id.index ?: throw IllegalStateException("DB returned null SecureHash index")
                             Pair(StateRef(txhash = SecureHash.parse(txId), index = index),
                                     UniquenessProvider.ConsumingTx(
@@ -111,6 +113,6 @@ class PersistentUniquenessProvider : UniquenessProvider, SingletonSerializeAsTok
             }
         }
 
-        if (conflict != null) throw DoubleSpendException(conflict)
+        if (conflict != null) throw InternalNotaryException(NotaryError.Conflict(txId, conflict))
     }
 }

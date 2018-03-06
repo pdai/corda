@@ -162,7 +162,6 @@ class NotaryServiceTests {
         val ex = assertFailsWith(NotaryException::class) { future.resultFuture.getOrThrow() }
         val notaryError = ex.error as NotaryError.Conflict
         assertEquals(notaryError.txId, stx2.id)
-        notaryError.signedConflict.verified()
     }
 
     @Test

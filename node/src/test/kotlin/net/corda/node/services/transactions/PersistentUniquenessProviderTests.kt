@@ -2,8 +2,9 @@ package net.corda.node.services.transactions
 
 import net.corda.core.crypto.SecureHash
 import net.corda.core.crypto.sha256
+import net.corda.core.flows.InternalNotaryException
+import net.corda.core.flows.NotaryError
 import net.corda.core.identity.CordaX500Name
-import net.corda.core.internal.DoubleSpendException
 import net.corda.node.internal.configureDatabase
 import net.corda.node.services.schema.NodeSchemaService
 import net.corda.nodeapi.internal.persistence.CordaPersistence
@@ -61,9 +62,10 @@ class PersistentUniquenessProviderTests {
             val inputs = listOf(inputState)
             provider.commit(inputs, txID, identity)
 
-            val ex = assertFailsWith<DoubleSpendException> { provider.commit(inputs, txID, identity) }
+            val ex = assertFailsWith<InternalNotaryException> { provider.commit(inputs, txID, identity) }
+            val error = ex.error as NotaryError.Conflict
 
-            val conflictCause = ex.error.stateConflicts[inputState]!!
+            val conflictCause = error.doubleSpendConflict.stateConflicts[inputState]!!
             assertEquals(conflictCause.transactionIdHash, txID.sha256())
         }
     }
