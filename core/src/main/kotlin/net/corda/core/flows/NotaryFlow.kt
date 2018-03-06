@@ -3,10 +3,7 @@ package net.corda.core.flows
 import co.paralleluniverse.fibers.Suspendable
 import net.corda.core.contracts.StateRef
 import net.corda.core.contracts.TimeWindow
-import net.corda.core.crypto.SecureHash
-import net.corda.core.crypto.SignedData
-import net.corda.core.crypto.TransactionSignature
-import net.corda.core.crypto.keys
+import net.corda.core.crypto.*
 import net.corda.core.identity.Party
 import net.corda.core.internal.FetchDataFlow
 import net.corda.core.internal.generateSignature
@@ -91,7 +88,11 @@ class NotaryFlow {
                 }
             } catch (e: NotaryException) {
                 if (e.error is NotaryError.Conflict) {
-                    e.error.conflict.verified()
+                    val conflict = e.error.signedConflict
+                    check(notaryParty.owningKey.isFulfilledBy(conflict.sig.by)) {
+                        "Double spend conflict information not signed by the expected notary."
+                    }
+                    conflict.verified()
                 }
                 throw e
             }
