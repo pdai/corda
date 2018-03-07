@@ -156,9 +156,9 @@ class BFTNonValidatingNotaryService(
                 BFTSMaRt.ReplicaResponse.Signature(sign(id))
             } catch (e: InternalNotaryException) {
                 log.debug { "Error processing transaction: ${e.error}" }
-                val serializedErorr = e.error.serialize()
-                val errorSignature = sign(serializedErorr.bytes)
-                val signedError = SignedData(serializedErorr, errorSignature)
+                val serializedError = e.error.serialize()
+                val errorSignature = sign(serializedError.bytes)
+                val signedError = SignedData(serializedError, errorSignature)
                 BFTSMaRt.ReplicaResponse.Error(signedError)
             }
         }
