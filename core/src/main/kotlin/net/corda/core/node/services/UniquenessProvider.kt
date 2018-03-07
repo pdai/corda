@@ -13,10 +13,10 @@ import net.corda.core.serialization.CordaSerializable
  * A uniqueness provider is expected to be used from within the context of a flow.
  */
 interface UniquenessProvider {
-    /** Commits all input states of the given transaction */
+    /** Commits all input states of the given transaction. */
     fun commit(states: List<StateRef>, txId: SecureHash, callerIdentity: Party)
 
-    /** Specifies the consuming transaction for every conflicting state */
+    /** Specifies the consuming transaction for every conflicting state. */
     @CordaSerializable
     @Deprecated("No longer used due to potential privacy leak")
     data class Conflict(val stateHistory: Map<StateRef, ConsumingTx>)

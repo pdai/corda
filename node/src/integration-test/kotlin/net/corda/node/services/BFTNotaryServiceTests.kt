@@ -146,7 +146,7 @@ class BFTNotaryServiceTests {
                     val exception = result.exception as NotaryException
                     val error = exception.error as NotaryError.Conflict
                     assertEquals(tx.id, error.txId)
-                    val (stateRef, cause) = error.doubleSpendConflict.stateConflicts.entries.single()
+                    val (stateRef, cause) = error.doubleSpendConflict.conflictCauses.entries.single()
                     assertEquals(StateRef(issueTx.id, 0), stateRef)
                     assertEquals(spendTxs[successfulIndex].id.sha256(), cause.transactionIdHash)
                 }

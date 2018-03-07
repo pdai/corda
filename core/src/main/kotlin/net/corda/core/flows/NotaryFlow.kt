@@ -232,12 +232,14 @@ class InternalNotaryException(val error: NotaryError) : FlowException("Unable to
 sealed class NotaryError {
     /** Occurs when one or more input states of transaction with [txId] have already been consumed by another transaction. */
     data class Conflict(
+            /** If of the transaction that was attempted to be notarised. */
             val txId: SecureHash,
+            /** Specifies which states have already been spent in another transaction. */
             val doubleSpendConflict: DoubleSpendConflict
     ) : NotaryError() {
         override fun toString() = "One or more input states for transaction $txId have been used in another transaction"
 
-        @Deprecated("No longer populated due to potential privacy issues", ReplaceWith("Use signedConflict property instead"))
+        @Deprecated("No longer populated due to potential privacy issues", ReplaceWith("doubleSpendConflict"))
         @Suppress("DEPRECATION")
         val conflict: SignedData<UniquenessProvider.Conflict>
             get() = signedEmptyUniquenessConflict
@@ -275,7 +277,7 @@ sealed class NotaryError {
 
 /** Contains information about the cause of the double-spend conflict for each of the conflicting input states. */
 @CordaSerializable
-data class DoubleSpendConflict(val stateConflicts: Map<StateRef, Cause>) {
+data class DoubleSpendConflict(val conflictCauses: Map<StateRef, Cause>) {
     @CordaSerializable
     data class Cause(
             /**

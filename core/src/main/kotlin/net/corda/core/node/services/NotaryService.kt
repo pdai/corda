@@ -85,7 +85,7 @@ abstract class TrustedAuthorityNotaryService : NotaryService() {
         } catch (e: InternalNotaryException) {
             if (e.error is NotaryError.Conflict) {
                 val conflicts = inputs.filterIndexed { _, stateRef ->
-                    val cause = e.error.doubleSpendConflict.stateConflicts[stateRef]
+                    val cause = e.error.doubleSpendConflict.conflictCauses[stateRef]
                     cause != null && cause.transactionIdHash != txId.sha256()
                 }
                 if (conflicts.isNotEmpty()) {
