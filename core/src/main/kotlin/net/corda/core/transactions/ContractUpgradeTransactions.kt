@@ -125,7 +125,7 @@ data class ContractUpgradeLedgerTransaction(
         override val inputs: List<StateAndRef<ContractState>>,
         override val notary: Party,
         val legacyContractAttachment: Attachment,
-        val upgradeContractClassName: ContractClassName,
+        val upgradedContractClassName: ContractClassName,
         val upgradedContractAttachment: Attachment,
         override val id: SecureHash,
         val privacySalt: PrivacySalt,
@@ -187,7 +187,7 @@ data class ContractUpgradeLedgerTransaction(
         // TODO: re-map encumbrance pointers
         input.state.copy(
                 data = upgradedState,
-                contract = upgradeContractClassName,
+                contract = upgradedContractClassName,
                 constraint = outputConstraint
         )
     }
@@ -204,7 +204,7 @@ data class ContractUpgradeLedgerTransaction(
     private fun loadUpgradedContract(): UpgradedContract<ContractState, *> {
         @Suppress("UNCHECKED_CAST")
         return this::class.java.classLoader
-                .loadClass(upgradeContractClassName)
+                .loadClass(upgradedContractClassName)
                 .asSubclass(Contract::class.java)
                 .getConstructor()
                 .newInstance() as UpgradedContract<ContractState, *>
