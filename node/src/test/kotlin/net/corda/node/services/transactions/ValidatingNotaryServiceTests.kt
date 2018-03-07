@@ -81,7 +81,7 @@ class ValidatingNotaryServiceTests {
 
         // Expecting SignaturesMissingException instead of NotaryException, since the exception should originate from
         // the client flow.
-        val ex = assertFailsWith(SignedTransaction.SignaturesMissingException::class) {
+        val ex = assertFailsWith<SignedTransaction.SignaturesMissingException> {
             val future = runClient(stx)
             future.getOrThrow()
         }

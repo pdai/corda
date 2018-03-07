@@ -70,9 +70,9 @@ class PersistentUniquenessProvider : UniquenessProvider, SingletonSerializeAsTok
                         toPersistentEntityKey = { PersistentStateRef(it.txhash.toString(), it.index) },
                         fromPersistentEntity = {
                             //TODO null check will become obsolete after making DB/JPA columns not nullable
-                            var txId = it.id.txId
+                            val txId = it.id.txId
                                     ?: throw IllegalStateException("DB returned null SecureHash transactionId")
-                            var index = it.id.index ?: throw IllegalStateException("DB returned null SecureHash index")
+                            val index = it.id.index ?: throw IllegalStateException("DB returned null SecureHash index")
                             Pair(StateRef(txhash = SecureHash.parse(txId), index = index),
                                     UniquenessProvider.ConsumingTx(
                                             id = SecureHash.parse(it.consumingTxHash),

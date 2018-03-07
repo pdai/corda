@@ -115,8 +115,8 @@ class NotaryFlow {
                 "Insufficient signatures to fulfill the notary signing requirement for $notary"
             }
             val errors = e.signedErrorResponses.map { it.verified() }
-            // TODO: relax this requirement to tolerate malicious nodes
-            // TODO: need to perform a deep comparison
+            // TODO: relax this requirement to tolerate malicious nodes.
+            // TODO: need to perform a deep comparison.
             require(errors.all { it::class == e.error::class}) {
                 "Errors reported by notary cluster members no not match"
             }
@@ -232,7 +232,7 @@ class InternalNotaryException(val error: NotaryError) : FlowException("Unable to
 sealed class NotaryError {
     /** Occurs when one or more input states of transaction with [txId] have already been consumed by another transaction. */
     data class Conflict(
-            /** If of the transaction that was attempted to be notarised. */
+            /** Id of the transaction that was attempted to be notarised. */
             val txId: SecureHash,
             /** Specifies which states have already been spent in another transaction. */
             val doubleSpendConflict: DoubleSpendConflict
