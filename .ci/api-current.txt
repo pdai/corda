@@ -1373,10 +1373,10 @@ public static final class net.corda.core.flows.NotarisationRequest$Companion ext
 @net.corda.core.serialization.CordaSerializable public abstract class net.corda.core.flows.NotaryError extends java.lang.Object
 ##
 @net.corda.core.serialization.CordaSerializable public static final class net.corda.core.flows.NotaryError$Conflict extends net.corda.core.flows.NotaryError
-  public <init>(net.corda.core.crypto.SecureHash, net.corda.core.crypto.SignedData)
+  public <init>(net.corda.core.crypto.SecureHash, net.corda.core.flows.DoubleSpendConflict)
   @org.jetbrains.annotations.NotNull public final net.corda.core.crypto.SecureHash component1()
-  @org.jetbrains.annotations.NotNull public final net.corda.core.crypto.SignedData component2()
-  @org.jetbrains.annotations.NotNull public final net.corda.core.flows.NotaryError$Conflict copy(net.corda.core.crypto.SecureHash, net.corda.core.crypto.SignedData)
+  @org.jetbrains.annotations.NotNull public final net.corda.core.flows.DoubleSpendConflict component2()
+  @org.jetbrains.annotations.NotNull public final net.corda.core.flows.NotaryError$Conflict copy(net.corda.core.crypto.SecureHash, net.corda.core.flows.DoubleSpendConflict)
   public boolean equals(Object)
   @org.jetbrains.annotations.NotNull public final net.corda.core.crypto.SignedData getConflict()
   @org.jetbrains.annotations.NotNull public final net.corda.core.crypto.SecureHash getTxId()
@@ -1429,7 +1429,7 @@ public static final class net.corda.core.flows.NotaryError$TimeWindowInvalid$Com
   public static final net.corda.core.flows.NotaryError$WrongNotary INSTANCE
 ##
 @net.corda.core.serialization.CordaSerializable public final class net.corda.core.flows.NotaryException extends net.corda.core.flows.FlowException
-  public <init>(net.corda.core.flows.NotaryError)
+  public <init>(net.corda.core.flows.NotaryError, List)
   @org.jetbrains.annotations.NotNull public final net.corda.core.flows.NotaryError getError()
 ##
 public final class net.corda.core.flows.NotaryFlow extends java.lang.Object
